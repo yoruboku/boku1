@@ -396,14 +396,14 @@
                 The external video servers often contain pop-up ads. <br>
                 We highly recommend using an <b>Adblocker</b> extension for the best viewing experience.
             </p>
-            <button class="btn btn-primary" style="width: 100%; justify-content: center;" onclick="document.getElementById('modal-adblock').style.display='none'">
+            <button class="btn btn-primary" style="width: 100%; justify-content: center;" onclick="localStorage.setItem('v_welcome', '1'); document.getElementById('modal-adblock').style.display='none'">
                 I Understand
             </button>
         </div>
     </div>
 
     <script>
-        const API = "442e19d498867de6bbc81e63de9b112";
+        const API = "YOUR_TMDB_API_KEY_HERE";
         const SERVERS = [
             { n: "VidSrc.ru (Best)", types: ['movie','tv','anime'], u: (id,t,s,e,aid) => `https://vidsrc-embed.ru/embed/${t}/${id}${t=='tv'?`/${s}-${e}`:''}` },
             { n: "VidLink", types: ['movie','tv','anime'], u: (id,t,s,e,aid) => `https://vidlink.pro/${t}/${id}${t=='tv'?`/${s}/${e}`:''}` },
@@ -461,6 +461,11 @@
                     }
                 });
                 document.getElementById('global-loader').style.display='none';
+                
+                // FIRST TIME WELCOME / ADBLOCK WARNING
+                if(!localStorage.getItem('v_welcome')) {
+                    document.getElementById('modal-adblock').style.display = 'flex';
+                }
             },
 
             login: () => {
@@ -737,8 +742,6 @@
         const player = {
             ep: null,
             init: async (s, e, srvIdx = 0) => {
-                document.getElementById('modal-adblock').style.display = 'flex';
-                
                 player.ep = s ? {s,e} : null;
                 app.closeModals();
                 document.getElementById('player').style.display = 'flex'; // FLEX, NOT BLOCK
