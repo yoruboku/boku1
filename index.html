@@ -2,9 +2,13 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Vemera | Infinite Streaming</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;700;800&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gun/sea.js"></script>
+
     <style>
         /* --- 1. DESIGN SYSTEM --- */
         :root {
@@ -217,6 +221,48 @@
             background: white; border: 4px solid #111; border-radius: 50%; 
             box-shadow: 0 0 10px rgba(0,0,0,0.5); 
         }
+
+        /* --- MOBILE / TABLET OPTIMIZATION --- */
+        @media (max-width: 1024px) {
+            nav { padding: 0 20px; grid-template-columns: 140px 1fr auto; height: 70px; }
+            .search-box { height: 40px; }
+            .container { padding: 90px 20px 40px; }
+            .hero { height: 50vh; }
+            .hero-content { padding: 30px; }
+            .hero-title { font-size: 2.5rem; }
+            .modal { width: 100%; height: 100%; max-height: 100%; border-radius: 0; padding: 20px; flex-direction: column; }
+            .modal-poster { width: 100%; height: 250px; margin-bottom: 20px; box-shadow: none; }
+            .modal-info { padding-bottom: 50px; }
+            .p-sidebar { width: 100%; }
+        }
+
+        @media (max-width: 768px) {
+            nav { display: flex; justify-content: space-between; padding: 0 15px; height: 60px; }
+            .search-area { flex: 1; margin: 0 10px; max-width: none; }
+            .search-box { padding: 0 10px; }
+            .search-input { font-size: 16px; /* prevent zoom on ios */ }
+            
+            .hero { height: 45vh; align-items: flex-end; }
+            .hero-content { padding: 20px; width: 100%; background: linear-gradient(to top, #050505, transparent); }
+            .hero-title { font-size: 1.8rem; margin-bottom: 10px; }
+            .hero-tags { margin-bottom: 15px; }
+            .hero-desc { display: none; } /* Hide description on small screens */
+            
+            .grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 15px; }
+            .card { flex: 0 0 140px; }
+            
+            .networks-wrap { gap: 10px; margin-bottom: 30px; }
+            .net-card { width: 100px; height: 50px; border-radius: 8px; }
+            
+            .login-box { width: 90%; padding: 30px 20px; }
+            
+            .p-bar { padding: 0 10px; gap: 10px; height: 60px; }
+            .p-bar button span { display: none; } /* Hide button text if icons used, but here we keep text small */
+            .p-bar .btn { padding: 8px 12px; font-size: 0.8rem; }
+            
+            /* Profile Modal specific */
+            .box-modal { width: 90%; max-height: 80vh; padding: 25px; }
+        }
     </style>
 </head>
 <body>
@@ -226,8 +272,8 @@
     <div id="login-overlay">
         <div class="login-box">
             <h2 style="margin-bottom:20px; font-weight:800">Welcome to Vemera</h2>
-            <p style="color:#888; margin-bottom:30px">Create a local profile to save your history.</p>
-            <input type="text" id="u-name" class="login-input" placeholder="Username (New)">
+            <p style="color:#888; margin-bottom:30px">Login or Sign Up to sync.</p>
+            <input type="text" id="u-name" class="login-input" placeholder="Username">
             <input type="password" id="u-pass" class="login-input" placeholder="Password">
             <button class="btn btn-primary" style="width:100%; justify-content:center" onclick="app.login()">START WATCHING</button>
         </div>
@@ -235,30 +281,24 @@
 
     <nav>
         <div class="logo" onclick="app.nav('home')">Vemera<span>.</span></div>
-        <div style="flex:1; display:flex; justify-content:center;">
-            <div class="search-area">
-                <div class="search-box">
-                    <svg class="icon" style="color:#666"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                    <input type="text" class="search-input" placeholder="Search movies, anime..." onkeyup="app.search(this.value)">
-                </div>
-                <div class="search-results" id="search-res"></div>
+        <div class="search-area">
+            <div class="search-box">
+                <svg class="icon" style="color:#666; min-width:20px"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <input type="text" class="search-input" placeholder="Search..." onkeyup="app.search(this.value)">
             </div>
+            <div class="search-results" id="search-res"></div>
         </div>
         <div class="nav-right">
-            <div style="color:#666; font-size:0.9rem; font-weight:600; margin-right:10px" id="user-display"></div>
             <button class="btn-glass" style="padding:10px; border-radius:8px" onclick="window.open('https://discord.gg/qjD4yZYg8j')">
                 <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>
-            </button>
-            <button class="btn-glass" style="padding:10px; border-radius:8px" onclick="window.open('https://github.com/yoruboku/vemera')">
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
             </button>
             <div class="profile-btn" onclick="app.toggleMenu()">
                 <svg class="icon" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
             </div>
             <div class="menu-drop" id="menu">
+                <div class="menu-item" onclick="app.modals.profile()">Profile</div>
                 <div class="menu-item" onclick="app.modals.settings()">Settings</div>
                 <div class="menu-item" onclick="app.modals.history()">History</div>
-                <div class="menu-item" onclick="app.logout()" style="color:#ef4444">Logout</div>
             </div>
         </div>
     </nav>
@@ -271,7 +311,7 @@
                 <div class="hero-content" id="hero-content">
                     <div class="hero-tags" id="hero-tags"></div>
                     <h1 class="hero-title" id="hero-title">Loading...</h1>
-                    <p style="color:#ddd; margin-bottom:30px; font-size:1.1rem; line-height:1.6; max-width:700px" id="hero-desc"></p>
+                    <p class="hero-desc" style="color:#ddd; margin-bottom:30px; font-size:1.1rem; line-height:1.6; max-width:700px" id="hero-desc"></p>
                     <button class="btn btn-primary" id="hero-play">▶ PLAY NOW</button>
                 </div>
             </div>
@@ -388,6 +428,38 @@
             <button class="btn btn-glass" style="margin-top:20px" onclick="app.closeModals()">Close</button>
         </div>
     </div>
+    
+    <div id="modal-profile" class="modal-over">
+        <div class="modal box-modal" style="flex-direction:column; gap:20px; text-align:center;">
+            <div style="width:80px; height:80px; background:var(--surface-2); border-radius:50%; margin:0 auto; display:flex; align-items:center; justify-content:center; font-size:2rem; font-weight:700; color:var(--primary)">
+                <span id="p-initial">U</span>
+            </div>
+            <div>
+                <h2 id="p-username" style="font-size:1.5rem; margin-bottom:5px">Username</h2>
+                <p style="color:#888; font-size:0.9rem">Account Active</p>
+            </div>
+            
+            <div style="display:flex; gap:10px; width:100%">
+                <div style="flex:1; background:var(--surface-2); padding:15px; border-radius:10px">
+                    <div id="p-count-mov" style="font-size:1.5rem; font-weight:800; color:#fff">0</div>
+                    <div style="font-size:0.8rem; color:#888">Movies</div>
+                </div>
+                <div style="flex:1; background:var(--surface-2); padding:15px; border-radius:10px">
+                    <div id="p-count-tv" style="font-size:1.5rem; font-weight:800; color:#fff">0</div>
+                    <div style="font-size:0.8rem; color:#888">Episodes</div>
+                </div>
+            </div>
+
+            <div style="width:100%; text-align:left">
+                <h3 style="font-size:0.9rem; color:#888; margin-bottom:10px">Your Data (Sync Backup)</h3>
+                <textarea id="p-data" style="width:100%; height:100px; background:#111; border:1px solid #333; color:#666; padding:10px; border-radius:8px; font-family:monospace; font-size:0.7rem; resize:none;" readonly></textarea>
+            </div>
+
+            <button class="btn btn-glass" style="width:100%" onclick="app.logout()">Log Out</button>
+            <button class="btn btn-primary" style="width:100%; background:#ef4444; box-shadow:none; border:none" onclick="app.deleteAccount()">Delete Account & Data</button>
+            <button class="btn btn-glass" style="width:100%; border:none" onclick="app.closeModals()">Close</button>
+        </div>
+    </div>
 
     <div id="modal-adblock" class="modal-over" style="z-index: 6000;">
         <div class="modal box-modal" style="width: 400px; text-align: center; height: auto; flex-direction:column; gap:20px;">
@@ -403,6 +475,10 @@
     </div>
 
     <script>
+        // --- GUN.JS INIT ---
+        const gun = Gun(['https://gun-manhattan.herokuapp.com/gun']); // Free public relay
+        const user = gun.user();
+        
         const API = "442e19d498867de6bbc81e63de9b1129";
         const SERVERS = [
             { n: "VidSrc.ru (Best)", types: ['movie','tv','anime'], u: (id,t,s,e,aid) => `https://vidsrc-embed.ru/embed/${t}/${id}${t=='tv'?`/${s}-${e}`:''}` },
@@ -424,10 +500,28 @@
             state: { cur: null, col: { id: null, type: null, page: 1 }, user: null },
             
             init: async () => {
-                // LOGIN CHECK
-                const u = localStorage.getItem('v_user');
-                if(!u) { document.getElementById('login-overlay').style.display = 'flex'; }
-                else { app.state.user = u; document.getElementById('login-overlay').style.display = 'none'; document.getElementById('user-display').innerText = u; }
+                // GUN.JS AUTH CHECK (Persistent Session)
+                user.recall({sessionStorage: true});
+                
+                gun.on('auth', () => {
+                    const alias = user.is.alias;
+                    app.state.user = alias;
+                    // Update UI - LOGIN OVERLAY HIDDEN
+                    document.getElementById('login-overlay').style.display = 'none';
+                    
+                    // START SYNC LISTENER
+                    user.get('history').on((data) => {
+                        if(data) {
+                            localStorage.setItem('v_hist_' + alias, data);
+                            app.hist(); // Update UI
+                        }
+                    });
+                });
+
+                // If not logged in after 500ms, show login screen
+                setTimeout(() => {
+                    if(!user.is) document.getElementById('login-overlay').style.display = 'flex';
+                }, 500);
 
                 const hue = localStorage.getItem('v_hue');
                 if(hue) document.documentElement.style.setProperty('--primary', `hsl(${hue}, 80%, 65%)`);
@@ -471,15 +565,35 @@
             login: () => {
                 const u = document.getElementById('u-name').value.trim();
                 const p = document.getElementById('u-pass').value.trim();
-                if(u && p) {
-                    localStorage.setItem('v_user', u);
-                    app.state.user = u;
-                    document.getElementById('login-overlay').style.display = 'none';
-                    document.getElementById('user-display').innerText = u;
-                    app.hist(); 
+                if(!u || !p) return alert("Please enter username and password");
+
+                // Try to create user
+                user.create(u, p, (ack) => {
+                    // If created OR already exists (error "published"), then auth
+                    if (!ack.err || ack.err.indexOf("published") > -1) {
+                        user.auth(u, p, (at) => {
+                            if (at.err) alert("Login Failed: " + at.err);
+                            // Success logic is handled by gun.on('auth') in init
+                        });
+                    } else {
+                        alert(ack.err);
+                    }
+                });
+            },
+            logout: () => { 
+                user.leave();
+                location.reload(); 
+            },
+            deleteAccount: () => {
+                if(confirm("Are you sure? This will wipe all your watch history permanently from all synced devices.")) {
+                    if(user.is) {
+                        user.get('history').put('[]'); // Wipe Cloud
+                        localStorage.removeItem('v_hist_' + app.state.user); // Wipe Local
+                        user.leave();
+                        location.reload();
+                    }
                 }
             },
-            logout: () => { localStorage.removeItem('v_user'); location.reload(); },
 
             slideshow: (list) => {
                 let i = 0;
@@ -669,20 +783,36 @@
                     title:i.title||i.name,
                     season: s, episode: e, serverIdx: srv 
                 });
-                localStorage.setItem('v_hist_'+app.state.user, JSON.stringify(h));
+                
+                const jsonString = JSON.stringify(h);
+                localStorage.setItem('v_hist_'+app.state.user, jsonString);
+                
+                // SYNC TO GUN
+                if(user.is) user.get('history').put(jsonString);
+
                 app.hist();
             },
             rmHist: (id) => {
                 if(!app.state.user) return;
                 let h = JSON.parse(localStorage.getItem('v_hist_'+app.state.user));
                 h = h.filter(x=>x.id!==id);
-                localStorage.setItem('v_hist_'+app.state.user, JSON.stringify(h));
+                
+                const jsonString = JSON.stringify(h);
+                localStorage.setItem('v_hist_'+app.state.user, jsonString);
+                
+                // SYNC TO GUN
+                if(user.is) user.get('history').put(jsonString);
+
                 app.hist();
                 if(document.getElementById('modal-history').style.display==='flex') app.modals.history();
             },
             clearHist: () => { 
                 if(!app.state.user) return;
                 localStorage.removeItem('v_hist_'+app.state.user); 
+                
+                // SYNC TO GUN
+                if(user.is) user.get('history').put('[]');
+
                 app.hist(); app.modals.history(); 
             },
 
@@ -700,6 +830,25 @@
                         r.innerHTML=`<img src="https://image.tmdb.org/t/p/w92${i.poster_path}"><div class="sb-info"><span>${i.title}</span><small>ID: ${i.id}</small></div><div style="color:#ef4444; margin-left:auto; padding:10px" onclick="app.rmHist(${i.id})">✕</div>`;
                         l.appendChild(r);
                     });
+                },
+                profile: () => {
+                    if(!app.state.user) return;
+                    document.getElementById('modal-profile').style.display='flex';
+                    const u = app.state.user;
+                    const h = JSON.parse(localStorage.getItem('v_hist_'+u)||'[]');
+                    
+                    document.getElementById('p-username').innerText = u;
+                    document.getElementById('p-initial').innerText = u.charAt(0).toUpperCase();
+                    
+                    // Stats
+                    const movies = h.filter(x=>x.type==='movie'||x.type==='anime').length;
+                    const episodes = h.filter(x=>x.type==='tv').length; // Roughly counting unique shows or episodes depending on structure, usually per item saved is an episode/movie state
+                    
+                    document.getElementById('p-count-mov').innerText = movies;
+                    document.getElementById('p-count-tv').innerText = episodes;
+                    
+                    // Data Dump
+                    document.getElementById('p-data').value = JSON.stringify(h, null, 2);
                 }
             },
             closeModals: () => document.querySelectorAll('.modal-over').forEach(e=>e.style.display='none'),
@@ -849,4 +998,3 @@
     </script>
 </body>
 </html>
-
