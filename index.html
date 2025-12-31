@@ -10,7 +10,7 @@
     <script src="https://cdn.jsdelivr.net/npm/gun/sea.js"></script>
 
     <style>
-        /* --- 1. DESIGN SYSTEM --- */
+        /* --- 1. DESIGN SYSTEM (DESKTOP BASE) --- */
         :root {
             --bg: #050505;
             --surface: #0f0f0f;
@@ -26,7 +26,8 @@
         
         h1, h2, h3, .btn, .logo, .hero-title { font-family: 'Poppins', sans-serif; }
 
-        ::-webkit-scrollbar { width: 6px; }
+        /* Custom Scrollbar (Desktop) */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: var(--bg); }
         ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
@@ -222,46 +223,88 @@
             box-shadow: 0 0 10px rgba(0,0,0,0.5); 
         }
 
-        /* --- MOBILE / TABLET OPTIMIZATION --- */
+        /* --- MOBILE / TABLET REBUILD (PERFECT) --- */
         @media (max-width: 1024px) {
+            /* General Sizing */
             nav { padding: 0 20px; grid-template-columns: 140px 1fr auto; height: 70px; }
             .search-box { height: 40px; }
             .container { padding: 90px 20px 40px; }
             .hero { height: 50vh; }
             .hero-content { padding: 30px; }
             .hero-title { font-size: 2.5rem; }
+            
+            /* Full Screen Modals on Tablet */
             .modal { width: 100%; height: 100%; max-height: 100%; border-radius: 0; padding: 20px; flex-direction: column; }
-            .modal-poster { width: 100%; height: 250px; margin-bottom: 20px; box-shadow: none; }
+            .modal-poster { width: 100%; height: 300px; margin-bottom: 20px; box-shadow: none; object-fit: contain; background: #000; }
             .modal-info { padding-bottom: 50px; }
             .p-sidebar { width: 100%; }
         }
 
         @media (max-width: 768px) {
+            /* 1. Mobile Navigation - Clean & Compact */
             nav { display: flex; justify-content: space-between; padding: 0 15px; height: 60px; }
-            .search-area { flex: 1; margin: 0 10px; max-width: 160px; } /* SMALLER SEARCH BAR */
-            .search-box { padding: 0 8px; height: 36px; }
-            .search-input { font-size: 14px; /* prevent zoom on ios */ }
+            .logo { font-size: 1.4rem; }
             
-            .hero { height: 45vh; align-items: flex-end; }
-            .hero-content { padding: 20px; width: 100%; background: linear-gradient(to top, #050505, transparent); }
-            .hero-title { font-size: 1.8rem; margin-bottom: 10px; }
-            .hero-tags { margin-bottom: 15px; }
-            .hero-desc { display: none; } /* Hide description on small screens */
+            /* Search bar optimized for small width */
+            .search-area { flex: 1; margin: 0 10px; max-width: 160px; }
+            .search-box { padding: 0 10px; height: 36px; border-radius: 20px; }
+            .search-input { font-size: 14px; }
+            .nav-right { gap: 8px; }
+            .btn-glass { padding: 8px; }
+            .profile-btn { width: 32px; height: 32px; }
+
+            /* 2. Hero Section - App Like */
+            .hero { height: 45vh; min-height: 350px; align-items: flex-end; border-radius: 0; border: none; border-bottom: 1px solid #222; margin: 0 -20px 30px; width: calc(100% + 40px); }
+            .hero-content { padding: 20px; width: 100%; background: linear-gradient(to top, #050505 10%, transparent); }
+            .hero-title { font-size: 2rem; margin-bottom: 10px; line-height: 1.1; }
+            .hero-tags { margin-bottom: 10px; }
+            .hero-desc { display: none; } /* Clean look */
+            .tag { padding: 3px 8px; font-size: 0.75rem; }
+
+            /* 3. Horizontal Rows - Snap Scroll */
+            .row { 
+                padding: 0 0 20px; gap: 10px; 
+                scroll-snap-type: x mandatory; 
+                -webkit-overflow-scrolling: touch; 
+            }
+            .row::-webkit-scrollbar { display: none; } /* Hide scrollbar on mobile */
             
-            .grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 15px; }
-            .card { flex: 0 0 140px; }
+            .card { 
+                flex: 0 0 130px; 
+                scroll-snap-align: start; 
+                border-radius: 8px; 
+            }
             
-            .networks-wrap { gap: 10px; margin-bottom: 30px; }
-            .net-card { width: 100px; height: 50px; border-radius: 8px; }
+            /* 4. Grid System - 2 Column Perfect */
+            .grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
             
-            .login-box { width: 90%; padding: 30px 20px; }
+            /* 5. Section Headers */
+            .sec-head { margin-top: 30px; margin-bottom: 15px; }
+            .sec-title { font-size: 1.1rem; }
+            .custom-select { padding: 5px 10px; font-size: 0.8rem; }
+
+            /* 6. Networks - Scrollable Row */
+            .networks-wrap { 
+                flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start; 
+                gap: 10px; margin: 0 -20px 30px; padding: 0 20px;
+                scroll-snap-type: x mandatory;
+            }
+            .networks-wrap::-webkit-scrollbar { display: none; }
+            .net-card { flex: 0 0 100px; height: 50px; scroll-snap-align: start; }
+
+            /* 7. Login Box */
+            .login-box { width: 90%; padding: 25px; border: none; background: #111; }
+            .login-input { padding: 12px; font-size: 16px; } /* Prevents iOS zoom */
+
+            /* 8. Player Mobile */
+            .p-bar { padding: 0 10px; gap: 10px; height: 50px; }
+            .p-bar button span { display: none; } 
+            .p-bar .btn { padding: 6px 12px; font-size: 0.8rem; }
+            .sb-item { padding: 8px; }
+            .sb-item img { width: 80px; }
             
-            .p-bar { padding: 0 10px; gap: 10px; height: 60px; }
-            .p-bar button span { display: none; } /* Hide button text if icons used, but here we keep text small */
-            .p-bar .btn { padding: 8px 12px; font-size: 0.8rem; }
-            
-            /* Profile Modal specific */
-            .box-modal { width: 90%; max-height: 80vh; padding: 25px; }
+            /* 9. Profile Modal */
+            .box-modal { width: 90%; max-height: 85vh; padding: 20px; }
         }
     </style>
 </head>
@@ -272,10 +315,10 @@
     <div id="login-overlay">
         <div class="login-box">
             <h2 style="margin-bottom:20px; font-weight:800">Welcome to Vemera</h2>
-            <p style="color:#888; margin-bottom:30px">Login or Sign Up to sync.</p>
+            <p style="color:#888; margin-bottom:30px">One account for all devices.</p>
             <input type="text" id="u-name" class="login-input" placeholder="Username">
             <input type="password" id="u-pass" class="login-input" placeholder="Password">
-            <button class="btn btn-primary" style="width:100%; justify-content:center" onclick="app.login()">START WATCHING</button>
+            <button class="btn btn-primary" style="width:100%; justify-content:center" onclick="app.login()">ENTER VEMERA</button>
         </div>
     </div>
 
@@ -572,16 +615,20 @@
 
                 // Try to create user
                 user.create(u, p, (ack) => {
-                    // If created successfully (no err) OR error is "User already created!" (or similar)
-                    // We check for "already created" or "published" or simple existance error
-                    if (!ack.err || (ack.err && (ack.err.includes("already created") || ack.err.includes("published")))) {
+                    // Check for success OR existing user error (smart login)
+                    // The error usually looks like "User is already being created or authenticated!"
+                    if (!ack.err || (ack.err && (
+                        ack.err.includes("already") || 
+                        ack.err.includes("published") || 
+                        ack.err.includes("authenticated")
+                    ))) {
                         // Account exists or created, now Login
                         user.auth(u, p, (at) => {
                             if (at.err) alert("Login Failed: " + at.err);
                             // Success logic is handled by gun.on('auth') in init
                         });
                     } else {
-                        // Real creation error (e.g. network)
+                        // Real error
                         alert("Error: " + ack.err);
                     }
                 });
