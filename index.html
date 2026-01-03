@@ -45,6 +45,13 @@
         
         .btn-glass { background: rgba(255,255,255,0.05); color: white; border: 1px solid var(--border); }
         .btn-glass:hover { background: rgba(255,255,255,0.1); border-color: var(--text-dim); }
+
+        /* ANIME BUTTONS */
+        .btn-anime-blue { background: #2563eb; color: white; border: 1px solid #1d4ed8; }
+        .btn-anime-blue:hover { background: #1d4ed8; box-shadow: 0 0 20px rgba(37, 99, 235, 0.4); }
+        
+        .btn-anime-green { background: #16a34a; color: white; border: 1px solid #15803d; }
+        .btn-anime-green:hover { background: #15803d; box-shadow: 0 0 20px rgba(22, 163, 74, 0.4); }
         
         .btn-icon { background: none; border: none; color: var(--text-dim); cursor: pointer; padding: 8px; border-radius: 50%; transition: 0.2s; }
         .btn-icon:hover { color: white; background: rgba(255,255,255,0.1); }
@@ -56,7 +63,6 @@
             display: grid; grid-template-columns: 200px 1fr auto; align-items: center; padding: 0 40px;
         }
         
-        /* UPDATED: LOGO CSS FOR IMAGE */
         .logo { 
             display: flex; 
             align-items: center; 
@@ -136,10 +142,31 @@
         .card { flex: 0 0 180px; position: relative; aspect-ratio: 2/3; border-radius: 12px; overflow: hidden; background: #121212; transition: 0.2s var(--ease); cursor: pointer; border: 1px solid transparent; }
         .card:hover { transform: translateY(-5px); border-color: rgba(255,255,255,0.2); box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 5; }
         .card img { width: 100%; height: 100%; object-fit: cover; }
-        .card-rm { position: absolute; top: 5px; right: 5px; color: #fff; opacity: 0; transition: 0.2s; font-weight: 800; font-size: 1.2rem; text-shadow: 0 2px 4px black; z-index: 10; }
-        .card:hover .card-rm { opacity: 1; }
-        .card-rm:hover { color: #ef4444; transform: scale(1.2); }
         
+        /* 3 Dots Menu Button on Card - PERFECTLY CENTERED */
+        .card-menu-btn { 
+            position: absolute; top: 10px; right: 10px; width: 30px; height: 30px; 
+            background: rgba(0,0,0,0.7); border-radius: 50%; display: flex; 
+            align-items: center; justify-content: center; color: white; 
+            opacity: 0; transition: 0.2s; z-index: 20; font-size: 1.2rem;
+            padding-bottom: 2px; /* Fine tune vertical alignment */
+        }
+        .card:hover .card-menu-btn { opacity: 1; }
+        .card-menu-btn:hover { background: var(--primary); }
+
+        /* Global Context Menu */
+        .ctx-menu {
+            position: fixed; background: #111; border: 1px solid var(--border);
+            border-radius: 8px; padding: 5px; width: 180px; z-index: 9999;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.8); display: none; flex-direction: column;
+        }
+        .ctx-item {
+            padding: 10px 15px; font-size: 0.9rem; color: #ccc; cursor: pointer;
+            border-radius: 4px; transition: 0.2s;
+        }
+        .ctx-item:hover { background: var(--surface-2); color: white; }
+        .ctx-item.danger:hover { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+
         .prog-bar { position: absolute; bottom: 0; left: 0; height: 4px; background: var(--primary); z-index: 5; }
 
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 25px; }
@@ -219,17 +246,22 @@
         .login-input { width: 100%; background: #222; border: 1px solid #333; padding: 15px; color: white; margin-bottom: 15px; border-radius: 8px; font-family: inherit; }
         .login-input:focus { border-color: var(--primary); }
         
-        /* CUSTOM HUE SLIDER (WEB BASED) */
+        /* IMPROVED CUSTOM HUE SLIDER */
         .hue-slider { 
-            -webkit-appearance: none; width: 100%; height: 15px; border-radius: 10px; margin: 25px 0; 
-            background: linear-gradient(to right, #f00 0%, #ff0 17%, #0f0 33%, #0ff 50%, #00f 67%, #f0f 83%, #f00 100%); 
-            outline: none; cursor: pointer;
+            -webkit-appearance: none; width: 100%; height: 12px; border-radius: 20px; margin: 30px 0; 
+            background: linear-gradient(to right, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000); 
+            outline: none; cursor: pointer; border: 2px solid #333;
         }
         .hue-slider::-webkit-slider-thumb { 
-            -webkit-appearance: none; width: 24px; height: 24px; 
-            background: white; border: 4px solid #111; border-radius: 50%; 
-            box-shadow: 0 0 10px rgba(0,0,0,0.5); 
+            -webkit-appearance: none; width: 28px; height: 28px; 
+            background: white; border: 3px solid #111; border-radius: 50%; 
+            box-shadow: 0 0 15px rgba(255,255,255,0.3); 
+            transition: transform 0.1s;
         }
+        .hue-slider::-webkit-slider-thumb:hover { transform: scale(1.1); }
+
+        /* TRAILER MODAL */
+        #trailer-frame { width: 100%; aspect-ratio: 16/9; border:none; border-radius: 12px; margin-bottom: 20px; }
     </style>
 </head>
 <body>
@@ -245,6 +277,8 @@
             <button class="btn btn-primary" style="width:100%; justify-content:center" onclick="app.login()">START WATCHING</button>
         </div>
     </div>
+
+    <div id="ctx-menu" class="ctx-menu"></div>
 
     <nav>
         <div class="logo" onclick="app.nav('home')">
@@ -271,8 +305,10 @@
                 <svg class="icon" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
             </div>
             <div class="menu-drop" id="menu">
-                <div class="menu-item" onclick="app.modals.settings()">Settings</div>
+                <div class="menu-item" onclick="app.modals.profile()">Profile</div>
+                <div class="menu-item" onclick="app.modals.wishlist()">Wishlist</div>
                 <div class="menu-item" onclick="app.modals.history()">History</div>
+                <div class="menu-item" onclick="app.modals.settings()">Settings</div>
                 <div class="menu-item" onclick="app.logout()" style="color:#ef4444">Logout</div>
             </div>
         </div>
@@ -318,7 +354,12 @@
             <div id="sec-history" style="display:none">
                 <div class="sec-head">
                     <div class="sec-title">Continue Watching</div>
-                    <select class="custom-select" onchange="app.hist(this.value)"><option value="all">All</option><option value="movie">Movies</option><option value="tv">TV</option></select>
+                    <select class="custom-select" onchange="app.hist(this.value)">
+                        <option value="all">All</option>
+                        <option value="movie">Movies</option>
+                        <option value="tv">TV</option>
+                        <option value="wishlist">Wishlist</option>
+                    </select>
                 </div>
                 <div class="row" id="row-hist"></div>
             </div>
@@ -341,9 +382,22 @@
             <button class="btn-icon" style="position:absolute; top:20px; right:20px; z-index:10" onclick="app.closeModals()">✕</button>
             <img id="dm-poster" class="modal-poster">
             <div class="modal-info">
+                <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+                    <div class="tag rating" id="dm-rating">NR</div>
+                    <div class="tag" id="dm-year"></div>
+                </div>
                 <h1 id="dm-title" style="font-size:3rem; font-weight:800; line-height:1; margin-bottom:15px">Title</h1>
                 <p id="dm-desc" style="color:#ccc; font-size:1.1rem; line-height:1.6; margin-bottom:30px"></p>
                 
+                <div style="display:flex; gap:15px; flex-wrap:wrap; margin-bottom:20px">
+                    <button class="btn btn-glass" id="dm-trailer-btn" style="display:none" onclick="app.openTrailer()">
+                        <svg class="icon" viewBox="0 0 24 24"><path d="M10 15l5-3-5-3v6z"/><path d="M2 12c0-5.52 4.48-10 10-10s10 4.48 10 10-4.48 10-10 10S2 17.52 2 12zm2 0c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8-8 3.58-8 8z"/></svg> 
+                        TRAILER
+                    </button>
+                    <button class="btn btn-anime-blue" id="btn-anime-world" style="display:none" onclick="app.openAnimeWorld()">Anime World</button>
+                    <button class="btn btn-anime-green" id="btn-anime-kai" style="display:none" onclick="app.openAnimeKai()">Anime Kai</button>
+                </div>
+
                 <div id="dm-mov" style="display:none">
                     <button class="btn btn-primary" style="padding:15px 30px; font-size:1.1rem" onclick="player.init()">▶ PLAY MOVIE</button>
                     <div id="dm-col-wrap" style="display:none; margin-top:30px;">
@@ -363,11 +417,22 @@
         </div>
     </div>
 
+    <div id="modal-trailer" class="modal-over" style="z-index: 4000;">
+        <div class="modal box-modal" style="width:900px; flex-direction: column;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:10px">
+                <h2>Trailer</h2>
+                <button class="btn-icon" onclick="app.closeTrailer()">✕</button>
+            </div>
+            <iframe id="trailer-frame" allowfullscreen allow="autoplay"></iframe>
+        </div>
+    </div>
+
     <div id="player">
         <div class="p-bar">
             <button class="btn btn-glass" onclick="player.close()">EXIT</button>
             <select id="srv-sel" class="custom-select" onchange="player.setServer(this.value)"></select>
             <div style="flex:1"></div>
+            <button class="btn btn-primary" id="next-ep-btn" style="margin-right:10px; display:none" onclick="player.next()">NEXT EP</button>
             <button class="btn btn-primary" onclick="player.toggleSb()">LIST</button>
         </div>
         <div class="p-wrapper">
@@ -404,6 +469,16 @@
         </div>
     </div>
 
+    <div id="modal-wishlist" class="modal-over">
+        <div class="modal" style="flex-direction:column; max-height:80vh">
+            <div class="sb-head" style="background:transparent; padding:0; border:none; margin-bottom:20px">
+                <h2>Wishlist</h2>
+            </div>
+            <div id="wish-list" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:10px"></div>
+            <button class="btn btn-glass" style="margin-top:20px" onclick="app.closeModals()">Close</button>
+        </div>
+    </div>
+
     <div id="modal-adblock" class="modal-over" style="z-index: 6000;">
         <div class="modal box-modal" style="width: 400px; text-align: center; height: auto; flex-direction:column; gap:20px;">
             <h2 style="color: #ef4444; font-weight: 800;">⚠️ Adblock Recommended</h2>
@@ -435,7 +510,7 @@
         ];
 
         const app = {
-            state: { cur: null, col: { id: null, type: null, page: 1 }, user: null },
+            state: { cur: null, col: { id: null, type: null, page: 1 }, user: null, trailer: null },
             
             init: async () => {
                 // LOGIN CHECK
@@ -463,15 +538,18 @@
                 app.row('row-tv', mixedTv);      // TV + Anime Series
                 app.hist();
                 
+                // Close context menu on click elsewhere
                 document.addEventListener('click', (e) => {
                     if (!e.target.closest('.search-area')) document.getElementById('search-res').style.display = 'none';
                     if (!e.target.closest('.nav-right')) document.getElementById('menu').style.display = 'none';
+                    if (!e.target.closest('.card-menu-btn')) document.getElementById('ctx-menu').style.display = 'none';
                 });
                 document.addEventListener('keydown', (e) => {
                     if(e.key === 'Escape') {
                         document.getElementById('search-res').style.display = 'none';
                         app.closeModals();
                         player.toggleSb(false);
+                        app.closeTrailer();
                     }
                 });
                 document.getElementById('global-loader').style.display='none';
@@ -549,25 +627,45 @@
                     const d = document.createElement('div');
                     d.className = 'card';
                     
+                    // Render Context Menu Button (3 dots)
+                    // We pass all necessary info as string attributes to retrieve later
+                    const menuBtn = `<div class="card-menu-btn" onclick="app.ctx(event, '${i.id}', '${type}', '${isHist}', '${i.poster_path}', '${(i.title||i.name||'').replace(/'/g, "")}')">⋮</div>`;
+                    
                     let progBar = '';
-                    if(isHist) {
-                        d.onclick = () => app.open(i.id, type, i.season, i.episode, i.serverIdx);
+                    if(isHist && app.currentHistView !== 'wishlist') {
+                        d.onclick = (e) => { if(!e.target.classList.contains('card-menu-btn')) app.open(i.id, type, i.season, i.episode, i.serverIdx); };
                         progBar = `<div class="prog-bar" style="width: ${Math.random()*100}%"></div>`;
                     } else {
-                        d.onclick = () => app.open(i.id, type);
+                        d.onclick = (e) => { if(!e.target.classList.contains('card-menu-btn')) app.open(i.id, type); };
                     }
 
-                    d.innerHTML = `<img src="https://image.tmdb.org/t/p/w300${i.poster_path}">${progBar}`;
+                    d.innerHTML = `${menuBtn}<img src="https://image.tmdb.org/t/p/w300${i.poster_path}">${progBar}`;
                     
-                    if(isHist) {
-                        const rm = document.createElement('div');
-                        rm.className = 'card-rm';
-                        rm.innerText = '✕';
-                        rm.onclick = (e) => { e.stopPropagation(); app.rmHist(i.id); };
-                        d.appendChild(rm);
-                    }
                     el.appendChild(d);
                 });
+            },
+
+            // --- CONTEXT MENU LOGIC ---
+            ctx: (e, id, type, isHist, poster, title) => {
+                e.stopPropagation();
+                const m = document.getElementById('ctx-menu');
+                m.style.display = 'flex';
+                m.style.top = e.clientY + 'px';
+                m.style.left = (e.clientX - 180) + 'px'; // open to left
+
+                m.innerHTML = '';
+                
+                // Menu Options based on context
+                if (isHist === 'true' && app.currentHistView !== 'wishlist') {
+                    // History Context: Remove, Finished
+                    m.innerHTML += `<div class="ctx-item" onclick="app.rmHist(${id})">Remove from list</div>`;
+                    m.innerHTML += `<div class="ctx-item" onclick="app.rmHist(${id})">Finished Watching</div>`; 
+                } else if(app.currentHistView === 'wishlist') {
+                     m.innerHTML += `<div class="ctx-item" onclick="app.rmWishlist('${id}')">Remove from Wishlist</div>`;
+                } else {
+                    // Standard Context: Add to Wishlist
+                    m.innerHTML += `<div class="ctx-item" onclick="app.addToWishlist('${id}','${type}','${poster}','${title}')">Add to Wishlist</div>`;
+                }
             },
 
             open: async (id, type, savedS=1, savedE=1, savedSrv=0) => {
@@ -576,18 +674,45 @@
                 
                 const apiType = type === 'anime' ? 'tv' : type;
                 let url = `${apiType}/${id}`;
-                if(apiType === 'movie') url += '?append_to_response=belongs_to_collection';
+                if(apiType === 'movie') url += '?append_to_response=belongs_to_collection,videos';
+                else url += '?append_to_response=videos';
 
                 const d = await app.req(url);
+                
+                // GET AGE RATING & TRAILER
+                const rating = await app.getRating(id, apiType);
+                const trailer = d.videos.results.find(v => v.site === "YouTube" && v.type === "Trailer");
+
                 // Double check anime status in detail view
                 const isAnime = type==='anime' || (d.genres.some(g=>g.id===16) && d.original_language==='ja');
                 const finalType = isAnime ? 'anime' : apiType;
 
                 app.state.cur = { ...d, type: finalType, savedS, savedE, savedSrv };
+                app.state.trailer = trailer ? trailer.key : null;
                 
+                // RENDER DETAILS
                 document.getElementById('dm-title').innerText = d.title || d.name;
                 document.getElementById('dm-desc').innerText = d.overview;
                 document.getElementById('dm-poster').src = `https://image.tmdb.org/t/p/w500${d.poster_path}`;
+                document.getElementById('dm-rating').innerText = rating;
+                document.getElementById('dm-year').innerText = (d.release_date || d.first_air_date || '').split('-')[0];
+                
+                // Show/Hide Trailer Button
+                const tb = document.getElementById('dm-trailer-btn');
+                if(trailer) tb.style.display = 'inline-flex';
+                else tb.style.display = 'none';
+
+                // Show/Hide Anime Buttons
+                const aw = document.getElementById('btn-anime-world');
+                const ak = document.getElementById('btn-anime-kai');
+                if(isAnime) {
+                    aw.style.display = 'inline-flex';
+                    ak.style.display = 'inline-flex';
+                } else {
+                    aw.style.display = 'none';
+                    ak.style.display = 'none';
+                }
+
                 document.getElementById('modal-detail').style.display = 'flex';
 
                 if(apiType === 'movie') {
@@ -625,9 +750,33 @@
                 document.getElementById('global-loader').style.display = 'none';
             },
 
+            openTrailer: () => {
+                if(app.state.trailer) {
+                    const frame = document.getElementById('trailer-frame');
+                    document.getElementById('modal-trailer').style.display = 'flex';
+                    
+                    // FIX 1: Use the "nocookie" domain which bypasses the Referrer check
+                    // FIX 2: Set referrerPolicy to 'strict-origin-when-cross-origin' to try and satisfy the header requirement
+                    frame.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
+                    frame.src = `https://www.youtube-nocookie.com/embed/${app.state.trailer}?autoplay=1`;
+                }
+            },
+            closeTrailer: () => {
+                document.getElementById('modal-trailer').style.display='none'; 
+                document.getElementById('trailer-frame').src='';
+            },
+
+            // Placeholder functions for Anime Buttons
+            openAnimeWorld: () => { window.open('https://watchanimeworld.in/'); },
+            openAnimeKai: () => { window.open('https://anikai.to/home'); },
+
             renderEps: async (s) => {
                 const l = document.getElementById('dm-eps'); l.innerHTML='Loading...';
                 const d = await app.req(`tv/${app.state.cur.id}/season/${s}`);
+                
+                // Store current season episode count for Next Button logic
+                app.state.cur.seasonEps = d.episodes.length;
+
                 l.innerHTML='';
                 d.episodes.forEach(e => {
                     const b = document.createElement('div'); b.className='ep-btn';
@@ -655,21 +804,42 @@
                 d.results.forEach(i => {
                     if(!i.poster_path) return;
                     const c = document.createElement('div'); c.className='card';
-                    c.innerHTML=`<img src="https://image.tmdb.org/t/p/w300${i.poster_path}">`;
-                    c.onclick=()=>app.open(i.id, i.title?'movie':'tv');
+                    
+                    // Add 3 dots here too
+                    const menuBtn = `<div class="card-menu-btn" onclick="app.ctx(event, '${i.id}', '${i.title?'movie':'tv'}', 'false', '${i.poster_path}', '${(i.title||i.name).replace(/'/g, "")}')">⋮</div>`;
+                    
+                    c.innerHTML=`${menuBtn}<img src="https://image.tmdb.org/t/p/w300${i.poster_path}">`;
+                    c.onclick=(e)=>{ if(!e.target.classList.contains('card-menu-btn')) app.open(i.id, i.title?'movie':'tv'); };
                     document.getElementById('col-grid').appendChild(c);
                 });
                 app.state.col.page++;
             },
 
-            // HISTORY NAMESPACED BY USER
+            // HISTORY & WISHLIST ROW LOGIC
+            currentHistView: 'all',
             hist: (f='all') => {
                 if(!app.state.user) return;
-                const h = JSON.parse(localStorage.getItem('v_hist_'+app.state.user)||'[]');
-                if(h.length>0) {
-                    document.getElementById('sec-history').style.display='block';
-                    app.row('row-hist', f==='all'?h:h.filter(x=>x.type===f), true);
-                } else { document.getElementById('sec-history').style.display='none'; }
+                app.currentHistView = f;
+                
+                let list = [];
+                if (f === 'wishlist') {
+                    // Load Wishlist
+                    list = JSON.parse(localStorage.getItem('v_wish_'+app.state.user)||'[]');
+                    if(list.length > 0) {
+                        document.getElementById('sec-history').style.display='block';
+                        // true for isHist flag, but we check currentHistView in row() to handle clicks
+                        app.row('row-hist', list, true); 
+                    } else {
+                        document.getElementById('sec-history').style.display='none';
+                    }
+                } else {
+                    // Load History
+                    list = JSON.parse(localStorage.getItem('v_hist_'+app.state.user)||'[]');
+                    if(list.length > 0) {
+                        document.getElementById('sec-history').style.display='block';
+                        app.row('row-hist', f==='all'?list:list.filter(x=>x.type===f), true);
+                    } else { document.getElementById('sec-history').style.display='none'; }
+                }
             },
             saveHist: (i, s=1, e=1, srv=0) => {
                 if(!app.state.user) return;
@@ -683,14 +853,15 @@
                     season: s, episode: e, serverIdx: srv 
                 });
                 localStorage.setItem('v_hist_'+app.state.user, JSON.stringify(h));
-                app.hist();
+                if(app.currentHistView !== 'wishlist') app.hist(app.currentHistView);
             },
             rmHist: (id) => {
                 if(!app.state.user) return;
                 let h = JSON.parse(localStorage.getItem('v_hist_'+app.state.user));
-                h = h.filter(x=>x.id!==id);
+                h = h.filter(x=>x.id != id); 
                 localStorage.setItem('v_hist_'+app.state.user, JSON.stringify(h));
-                app.hist();
+                if(app.currentHistView !== 'wishlist') app.hist(app.currentHistView);
+                document.getElementById('ctx-menu').style.display='none';
                 if(document.getElementById('modal-history').style.display==='flex') app.modals.history();
             },
             clearHist: () => { 
@@ -699,10 +870,53 @@
                 app.hist(); app.modals.history(); 
             },
 
+            // --- WISHLIST LOGIC ---
+            addToWishlist: (id, type, poster, title) => {
+                if(!app.state.user) return alert("Please login first");
+                let w = JSON.parse(localStorage.getItem('v_wish_'+app.state.user)||'[]');
+                if(!w.find(x => x.id == id)) {
+                    w.unshift({ id, type, poster_path: poster, title });
+                    localStorage.setItem('v_wish_'+app.state.user, JSON.stringify(w));
+                    alert("Added to Wishlist");
+                } else {
+                    alert("Already in Wishlist");
+                }
+                document.getElementById('ctx-menu').style.display='none';
+            },
+            rmWishlist: (id) => {
+                if(!app.state.user) return;
+                let w = JSON.parse(localStorage.getItem('v_wish_'+app.state.user)||'[]');
+                w = w.filter(x => x.id != id);
+                localStorage.setItem('v_wish_'+app.state.user, JSON.stringify(w));
+                if(app.currentHistView === 'wishlist') app.hist('wishlist'); // Refresh row if active
+                if(document.getElementById('modal-wishlist').style.display==='flex') app.modals.wishlist(); // Refresh modal
+                document.getElementById('ctx-menu').style.display='none';
+            },
+
             nav: (v) => { document.querySelectorAll('.view').forEach(e=>e.style.display='none'); document.getElementById('view-'+v).style.display='block'; window.scrollTo(0,0); },
             toggleMenu: () => { const m=document.getElementById('menu'); m.style.display=m.style.display==='flex'?'none':'flex'; },
             modals: {
                 settings: () => document.getElementById('modal-settings').style.display='flex',
+                profile: () => alert("Profile feature coming soon!"), 
+                wishlist: () => {
+                    document.getElementById('modal-wishlist').style.display='flex';
+                    const w=JSON.parse(localStorage.getItem('v_wish_'+app.state.user)||'[]');
+                    const l=document.getElementById('wish-list'); l.innerHTML='';
+                    if(w.length === 0) l.innerHTML = '<div style="padding:20px; color:#666">No items in wishlist</div>';
+                    w.forEach(i=>{
+                        const r=document.createElement('div'); 
+                        r.className='sb-item'; 
+                        r.innerHTML=`<img src="https://image.tmdb.org/t/p/w92${i.poster_path}"><div class="sb-info"><span>${i.title}</span><small>ID: ${i.id}</small></div><div style="color:#ef4444; margin-left:auto; padding:10px" onclick="event.stopPropagation(); app.rmWishlist('${i.id}')">✕</div>`;
+                        // CLICKING WISHLIST ITEM OPENS INFO
+                        r.onclick = (e) => { 
+                             if(!e.target.innerText.includes('✕')) { 
+                                app.closeModals(); 
+                                app.open(i.id, i.type); 
+                             } 
+                        };
+                        l.appendChild(r);
+                    });
+                },
                 history: () => {
                     document.getElementById('modal-history').style.display='flex';
                     const h=JSON.parse(localStorage.getItem('v_hist_'+app.state.user)||'[]');
@@ -715,7 +929,10 @@
                     });
                 }
             },
-            closeModals: () => document.querySelectorAll('.modal-over').forEach(e=>e.style.display='none'),
+            closeModals: () => {
+                document.querySelectorAll('.modal-over').forEach(e=>e.style.display='none');
+                app.closeTrailer();
+            },
             theme: (v) => { document.documentElement.style.setProperty('--primary', `hsl(${v}, 80%, 65%)`); localStorage.setItem('v_hue', v); },
             
             search: async (q) => {
@@ -760,15 +977,18 @@
                 document.getElementById('player').style.display = 'flex'; // FLEX, NOT BLOCK
                 
                 const item = app.state.cur;
-                
+                const nextBtn = document.getElementById('next-ep-btn');
+
                 if(item.type !== 'movie') {
                     document.getElementById('sb-season-wrap').style.display='block';
                     document.getElementById('sb-title').innerText = "Episodes";
                     const sel = document.getElementById('sb-season'); sel.innerHTML='';
                     for(let i=1; i<=item.number_of_seasons; i++) sel.innerHTML+=`<option value="${i}" ${i==s?'selected':''}>Season ${i}</option>`;
                     player.loadSbEps(s||1);
+                    nextBtn.style.display = 'inline-flex'; // Show Next Button
                 } else {
                     document.getElementById('sb-season-wrap').style.display='none';
+                    nextBtn.style.display = 'none'; // Hide Next Button for Movies
                     if(item.belongs_to_collection) {
                         document.getElementById('sb-title').innerText = "Collection";
                         player.loadSbCollection(item.belongs_to_collection.id);
@@ -791,6 +1011,15 @@
                 player.setServer(srvIdx); 
                 app.saveHist(item, s, e, srvIdx);
             },
+            
+            // NEXT EPISODE LOGIC
+            next: () => {
+                if(!player.ep) return;
+                const currentS = parseInt(player.ep.s);
+                const currentE = parseInt(player.ep.e);
+                player.init(currentS, currentE + 1, document.getElementById('srv-sel').value);
+            },
+
             setServer: (i) => document.getElementById('iframe').src = document.getElementById('srv-sel').options[i].dataset.url,
             toggleSb: (force) => { 
                 const sb = document.getElementById('sidebar'); 
